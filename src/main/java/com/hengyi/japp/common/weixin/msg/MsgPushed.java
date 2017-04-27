@@ -23,6 +23,7 @@ import java.io.StringReader;
  * @author jzb
  */
 public class MsgPushed implements Serializable {
+    private final String _xmlText;
     private final String ToUserName;
     private final String FromUserName;
     private final long CreateTime;
@@ -41,8 +42,11 @@ public class MsgPushed implements Serializable {
     private final String Label;
     private final long MsgId;
     private final int AgentID;
+    private final String ScanType;
+    private final String ScanResult;
 
     public MsgPushed(String xmlText) throws ParserConfigurationException, IOException, SAXException {
+        this._xmlText = xmlText;
         try (StringReader sr = new StringReader(xmlText)) {
             DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
             Document document = db.parse(new InputSource(sr));
@@ -66,6 +70,8 @@ public class MsgPushed implements Serializable {
             Scale = intV(root, "Scale");
             MsgId = longV(root, "MsgId");
             AgentID = intV(root, "AgentID");
+            ScanType = stringV(root, "ScanType");
+            ScanResult = stringV(root, "ScanResult");
         }
     }
 
@@ -99,6 +105,28 @@ public class MsgPushed implements Serializable {
 
     public boolean isEvt_unsubscribe() {
         return isEvt("unsubscribe");
+    }
+
+    public boolean isEvt_SCAN() {
+        return isEvt("SCAN");
+    }
+
+    /**
+     * <xml><ToUserName><![CDATA[toUser]]></ToUserName>
+     * <FromUserName><![CDATA[FromUser]]></FromUserName>
+     * <CreateTime>1408090606</CreateTime>
+     * <MsgType><![CDATA[event]]></MsgType>
+     * <Event><![CDATA[scancode_waitmsg]]></Event>
+     * <EventKey><![CDATA[6]]></EventKey>
+     * <ScanCodeInfo>
+     * <ScanType><![CDATA[qrcode]]></ScanType>
+     * <ScanResult><![CDATA[2]]></ScanResult>
+     * </ScanCodeInfo>
+     * <AgentID>1</AgentID>
+     * </xml>
+     */
+    public boolean isEvt_scancode_waitmsg() {
+        return isEvt("scancode_waitmsg");
     }
 
     /**
@@ -219,5 +247,18 @@ public class MsgPushed implements Serializable {
 
     public long getMsgId() {
         return MsgId;
+    }
+
+    public String getScanType() {
+        return ScanType;
+    }
+
+    public String getScanResult() {
+        return ScanResult;
+    }
+
+    @Override
+    public String toString() {
+        return _xmlText;
     }
 }

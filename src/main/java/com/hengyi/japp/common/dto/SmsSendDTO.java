@@ -13,10 +13,7 @@ import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlSchemaType;
 import java.io.Serializable;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @XmlRootElement
 @XmlAccessorType(XmlAccessType.FIELD)
@@ -27,7 +24,7 @@ public class SmsSendDTO implements Serializable {
     private String content;
     @NotNull
     @Size(min = 1)
-    private List<String> phones;
+    private Collection<String> phones;
     /*
      * 流水号，20位数字，唯一
      */
@@ -48,13 +45,17 @@ public class SmsSendDTO implements Serializable {
         super();
     }
 
-    public SmsSendDTO(String content, String... phones) {
+    public SmsSendDTO(String content, Collection phones) {
         super();
         setContent(content);
-        setPhones(Lists.newArrayList(phones));
+        setPhones(phones);
     }
 
-    public static final String getPhonesAsString(List<String> phones) {
+    public SmsSendDTO(String content, String... phones) {
+        this(content, Sets.newHashSet(phones));
+    }
+
+    public static final String getPhonesAsString(Collection<String> phones) {
         String result = Arrays.toString(phones.toArray());
         result = StringUtils.deleteWhitespace(result);
         return result.substring(1, result.length() - 1);
@@ -101,11 +102,11 @@ public class SmsSendDTO implements Serializable {
         this.sendDate = sendDate;
     }
 
-    public List<String> getPhones() {
+    public Collection<String> getPhones() {
         return phones;
     }
 
-    public void setPhones(List<String> phones) {
+    public void setPhones(Collection<String> phones) {
         Set<String> _set = Sets.newHashSet(phones);
         this.phones = Lists.newArrayList(_set);
     }

@@ -35,6 +35,10 @@ public class QyAgent extends WeixinClient {
         return agentid;
     }
 
+    public WXBizMsgCrypt getWxbmc() {
+        return wxbmc;
+    }
+
     private class Urls {
         final static String msg_send = "https://qyapi.weixin.qq.com/cgi-bin/message/send";
     }

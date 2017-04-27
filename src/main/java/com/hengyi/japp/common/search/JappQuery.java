@@ -26,4 +26,12 @@ public abstract class JappQuery<T> {
     public T result() {
         return result;
     }
+
+    public void setCount(long count) {
+        this.count = count;
+    }
+
+    public void setResult(T result) {
+        this.result = result;
+    }
 }

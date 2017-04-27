@@ -3,6 +3,7 @@ package lamba;
 import com.google.common.collect.Lists;
 
 import java.util.List;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -17,7 +18,7 @@ public class MapCollect {
     }
 
     public static void main(String[] args) {
-        tests.stream().collect(Collectors.toMap(test -> test.id, test -> test));
+        tests.stream().collect(Collectors.toMap(test -> test.id, Function.identity()));
     }
 
     static class Test {

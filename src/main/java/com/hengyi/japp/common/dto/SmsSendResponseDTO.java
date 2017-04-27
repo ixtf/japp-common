@@ -88,4 +88,9 @@ public class SmsSendResponseDTO implements Serializable {
     public String get_resp() {
         return _resp;
     }
+
+    @Override
+    public String toString() {
+        return _resp;
+    }
 }

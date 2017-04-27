@@ -1,26 +1,38 @@
 package com.hengyi.japp.common;
 
 import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.uuid.Generators;
 import com.google.zxing.WriterException;
+import com.hengyi.japp.common.dto.SmsSendDTO;
+import com.hengyi.japp.common.dto.SmsSendResponseDTO;
+import com.hengyi.japp.common.interfaces.sms.soap.SmsPortType;
+import com.hengyi.japp.common.interfaces.sms.soap.Sms_Service;
 import com.hengyi.japp.common.sap.DestinationType;
 import com.hengyi.japp.common.sap.SapClient;
+import com.hengyi.japp.common.toHtml.ToHtml;
+import com.hengyi.japp.common.toHtml.ToHtmlBuilder;
+import com.hengyi.japp.common.toHtml.ToHtmlType;
 import com.hengyi.japp.common.weixin.*;
 import com.qq.weixin.mp.aes.AesException;
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.time.DateFormatUtils;
 import org.apache.commons.lang3.time.FastDateFormat;
+import org.apache.poi.xwpf.converter.xhtml.XHTMLOptions;
 
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.*;
 import java.lang.annotation.Annotation;
+import java.net.URLEncoder;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.time.*;
-import java.util.Date;
-import java.util.Properties;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static com.hengyi.japp.common.Constant.MAPPER;
 import static java.nio.charset.StandardCharsets.UTF_8;
@@ -33,9 +45,36 @@ public class J {
 //        return Generators.timeBasedGenerator().generate().toString();
 //    }
 
-//    public static final String uuid64() {
+//    public static final String uuid58(UUID uuid) {
 //        return J_codec.uuid64(Generators.timeBasedGenerator().generate());
 //    }
+
+    public static <T> String sqlIn(Collection<T> collection, Function<T, String> fn) {
+        return collection.stream()
+                .parallel()
+                .map(fn)
+                .distinct()
+                .collect(Collectors.joining(","));
+    }
+
+    public static <T> String sqlIn(Collection<T> collection) {
+        return sqlIn(collection, Objects::toString);
+    }
+
+    public static String sqlLike(String s) {
+        return "'%" + StringUtils.defaultString(s) + "%'";
+    }
+
+    public static SmsSendResponseDTO sendSms(SmsSendDTO dto) {
+        final String SMS_SPCODE = StringUtils.defaultIfBlank(System.getProperty("SMS_SPCODE"), "217025");
+        final String SMS_LOGINNAME = StringUtils.defaultIfBlank(System.getProperty("SMS_LOGINNAME"), "zj_hysh");
+        final String SMS_PASSWORD = StringUtils.defaultIfBlank(System.getProperty("SMS_PASSWORD"), "hysh1234");
+        SmsPortType smsPortType = new Sms_Service().getSmsHttpPort();
+        String res = smsPortType.sms(SMS_SPCODE, SMS_LOGINNAME, SMS_PASSWORD,
+                dto.getContent(), dto.getPhonesAsString(), dto.getSerialNumber(), dto.getScheduleTime(), dto.getSendCheckType(),
+                null, null, null);
+        return new SmsSendResponseDTO(res);
+    }
 
     public static final String nameUuid58(String... names) {
         String name = String.join(",", names);
@@ -64,15 +103,26 @@ public class J {
     }
 
     public static String toJson(Object o) {
-        return J_json.writeValueAsString(o);
+        return o == null ? null : J_json.writeValueAsString(o);
     }
 
-    public static <T> T fromJson(String s, Class<T> clazz) {
-        return J_json.readValue(s, clazz);
+    public static ObjectNode toObjectNode(Object o) {
+        return o == null ? null : MAPPER.convertValue(o, ObjectNode.class);
+    }
+
+    public static ArrayNode toArrayNode(Collection o) {
+        ArrayNode result = MAPPER.createArrayNode();
+        if (CollectionUtils.isNotEmpty(o))
+            o.forEach(it -> result.add(toObjectNode(it)));
+        return result;
+    }
+
+    public static <T> T fromJson(String o, Class<T> clazz) {
+        return o == null ? null : J_json.readValue(o, clazz);
     }
 
     public static <T> T fromJson(JsonParser o, Class<T> clazz) {
-        return J_json.readValue(o, clazz);
+        return o == null ? null : J_json.readValue(o, clazz);
     }
 
     public static <T> T convertValue(Object fromValue, Class<T> toValueType) {
@@ -181,7 +231,19 @@ public class J {
         return J_image.qrcode(content);
     }
 
+    public static final BufferedImage resizeImage(File file, int newWidth) throws IOException {
+        return J_image.resize(file, newWidth, 1);
+    }
+
     public static final String cas_url(String url) {
-        return "http://cas.hengyi.com:8080/login?service=" + url;
+        try {
+            return "http://cas.hengyi.com:8080/login?service=" + URLEncoder.encode(url, UTF_8.name());
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    public static final ToHtmlBuilder file2Html() throws Exception {
+        return new ToHtmlBuilder();
     }
 }

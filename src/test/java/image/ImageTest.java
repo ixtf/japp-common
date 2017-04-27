@@ -3,6 +3,8 @@ package image;
 import com.google.common.collect.Lists;
 import com.google.zxing.WriterException;
 import com.hengyi.japp.common.J;
+import com.hengyi.japp.common.J_image;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.Assert;
 import org.junit.Test;
@@ -63,6 +65,12 @@ public class ImageTest {
     public void test3() throws WriterException, IOException {
         System.out.println(J.qrcode("fdsadfasfasdf"));
         ImageIO.write(J.qrcode("test"), "png", new File("/home/jzb/test.png"));
+    }
+
+    @Test
+    public void test4() throws WriterException, IOException {
+        File file = FileUtils.getFile("/home/jzb/图片", "37ad578cb2d84b5383037afc8bccda26.jpg");
+        ImageIO.write(J_image.resize(file, 50, 1), "png", new File("/home/jzb/test.png"));
     }
 
 }

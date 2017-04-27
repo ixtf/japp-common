@@ -38,7 +38,7 @@ public class QyTest {
 //        p.put("encodingaeskey", "vkoFXDgOsunF1NfkriipatPpHviDVgZdCSuJvH4zweY");
     }
 
-    @Test
+//    @Test
     public void test() throws AesException, IOException, WxException {
         QyClient qy = J.weixinQy(p);
         QyAgent agent = J.weixinQyAgent(p);

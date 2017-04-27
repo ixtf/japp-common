@@ -99,6 +99,11 @@ public class QyClient extends WeixinClient {
         return MAPPER.convertValue(node.get("userlist"), javaType);
     }
 
+    public QyUserDTO user_get(String userid) throws IOException, WxException {
+        JsonNode node = get(Urls.user_get, ImmutableMap.of("access_token", access_token(), "userid", userid));
+        return MAPPER.convertValue(node, QyUserDTO.class);
+    }
+
     synchronized QyAgent agent(Properties p) throws AesException {
         int agentid = Integer.parseInt(p.getProperty("agentid"));
         QyAgent result = agents.get(agentid);
@@ -121,5 +126,6 @@ public class QyClient extends WeixinClient {
         public static final String dep_list = "https://qyapi.weixin.qq.com/cgi-bin/department/list";
         public static final String user_simplelist = "https://qyapi.weixin.qq.com/cgi-bin/user/simplelist";
         public static final String user_list = "https://qyapi.weixin.qq.com/cgi-bin/user/list";
+        public static final String user_get = "https://qyapi.weixin.qq.com/cgi-bin/user/get";
     }
 }
